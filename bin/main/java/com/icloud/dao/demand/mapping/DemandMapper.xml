@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icloud.dao.demand.DemandMapper">
+	<resultMap id="BaseResultMap" type="com.icloud.model.demand.Demand">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="demand_desc" property="demandDesc" jdbcType="VARCHAR" />
+		<result column="demand_pics" property="demandPics" jdbcType="VARCHAR" />
+		<result column="product_name" property="productName" jdbcType="VARCHAR" />
+		<result column="category_id" property="categoryId" jdbcType="VARCHAR" />
+		<result column="published_user" property="publishedUser"
+			jdbcType="VARCHAR" />
+		<result column="published_phone" property="publishedPhone"
+			jdbcType="VARCHAR" />
+		<result column="published_name" property="publishedName"
+			jdbcType="VARCHAR" />
+		<result column="pushlished_time" property="pushlishedTime"
+			jdbcType="TIMESTAMP" />
+		<result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+		<result column="demand_status" property="demandStatus"
+			jdbcType="VARCHAR" />
+		<result column="response_id" property="responseId" jdbcType="VARCHAR" />
+		<result column="response_time" property="responseTime"
+			jdbcType="TIMESTAMP" />
+		<result column="termination_status" property="terminationStatus"
+			jdbcType="VARCHAR" />
+		<collection property="category" column="category_id"
+			select="com.icloud.dao.category.CategoryMapper.findForObject" />
+	</resultMap>
+	
+	<resultMap type="com.icloud.common.dto.vo.CountVo" id="countVo">
+	  <result column="date" property="date" jdbcType="VARCHAR"/>
+	  <result column="count" property="count" jdbcType="INTEGER"/>
+	</resultMap>
+	
+	<sql id="Base_Column_List">
+		id, demand_desc, demand_pics, product_name, category_id, published_user,
+		published_phone,
+		published_name, pushlished_time, modify_time, demand_status, response_id,
+		response_time,termination_status
+	</sql>
+
+	<select id="findForObject" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from t_demand
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByKey" parameterType="java.lang.String">
+		delete from t_demand
+		where id = #{id,jdbcType=VARCHAR}
+	</delete>
+
+	<insert id="save" parameterType="com.icloud.model.demand.Demand">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			select
+			replace(uuid(),'-','') from dual
+		</selectKey>
+		insert into t_demand (id, demand_desc, demand_pics,
+		product_name, category_id, published_user,
+		published_phone, published_name, pushlished_time,
+		modify_time, demand_status, response_id,
+		response_time,termination_status)
+		values (#{id,jdbcType=VARCHAR}, #{demandDesc,jdbcType=VARCHAR},
+		#{demandPics,jdbcType=VARCHAR},
+		#{productName,jdbcType=VARCHAR}, #{categoryId,jdbcType=VARCHAR}, #{publishedUser,jdbcType=VARCHAR},
+		#{publishedPhone,jdbcType=VARCHAR}, #{publishedName,jdbcType=VARCHAR},
+		#{pushlishedTime,jdbcType=TIMESTAMP},
+		#{modifyTime,jdbcType=TIMESTAMP}, #{demandStatus,jdbcType=VARCHAR},
+		#{responseId,jdbcType=VARCHAR},
+		#{responseTime,jdbcType=TIMESTAMP},#{terminationStatus,jdbcType=TIMESTAMP})
+	</insert>
+    <!-- 更新 -->
+	<update id="update" parameterType="com.icloud.model.demand.Demand">
+		update t_demand
+		<set>
+			<if test="demandDesc != null">
+				demand_desc = #{demandDesc,jdbcType=VARCHAR},
+			</if>
+			<if test="demandPics != null">
+				demand_pics = #{demandPics,jdbcType=VARCHAR},
+			</if>
+			<if test="productName != null">
+				product_name = #{productName,jdbcType=VARCHAR},
+			</if>
+			<if test="categoryId != null">
+				category_id = #{categoryId,jdbcType=VARCHAR},
+			</if>
+			<if test="publishedUser != null">
+				published_user = #{publishedUser,jdbcType=VARCHAR},
+			</if>
+			<if test="publishedPhone != null">
+				published_phone = #{publishedPhone,jdbcType=VARCHAR},
+			</if>
+			<if test="publishedName != null">
+				published_name = #{publishedName,jdbcType=VARCHAR},
+			</if>
+			<if test="pushlishedTime != null">
+				pushlished_time = #{pushlishedTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="modifyTime != null">
+				modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="demandStatus != null">
+				demand_status = #{demandStatus,jdbcType=VARCHAR},
+			</if>
+			<if test="responseId != null">
+				response_id = #{responseId,jdbcType=VARCHAR},
+			</if>
+			<if test="responseTime != null">
+				response_time = #{responseTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="terminationStatus!=null">
+				termination_status=#{terminationStatus},
+			</if>
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<!-- 需求列表 -->
+	<select id="findForList" parameterType="com.icloud.model.demand.Demand"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_demand t
+		<where>
+			<if test="productName!=null">
+				and t.product_name like concat(concat('%',#{productName}),'%')
+			</if>
+			<if test="categoryId!=null">
+				and t.category_id=#{categoryId,jdbcType=VARCHAR}
+			</if>
+			<if test="publishedUser!=null">
+				and t.published_user=#{publishedUser}
+			</if>
+			<if test="publishedPhone!=null">
+				and t.published_phone like concat(concat('%',#{publishedPhone}),'%')
+			</if>
+			<if test="publishedName!=null">
+				and t.published_name like concat(concat('%',#{publishedName}),'%')
+			</if>
+			<if test="responseId!=null">
+				and t.response_id = #{responseId}
+			</if>
+			<if test="demandStatus!=null">
+				and t.demand_status = #{demandStatus}
+			</if>
+			<if test="pushlishedStartTime!=null">
+				and UNIX_TIMESTAMP(t.pushlished_time) &gt;
+				UNIX_TIMESTAMP(DATE_FORMAT(#{pushlishedStartTime},'%Y-%m-%d
+				%H:%i:%s'))
+			</if>
+			<if test="pushlishedEndTime!=null">
+				and UNIX_TIMESTAMP(t.pushlished_time) &lt;
+				UNIX_TIMESTAMP(DATE_FORMAT(#{pushlishedEndTime},'%Y-%m-%d
+				%H:%i:%s'))
+			</if>
+		</where>
+	</select>
+	<!-- 我的关注列表 -->
+	<select id="findFollowList" parameterType="com.icloud.model.demand.Demand"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_demand t,t_follow t1
+		<where>
+			t.id=t1.demand_id and t1.user_id=#{publishedUser}
+			<if test="productName!=null">
+				and t.product_name like concat(concat('%',#{productName}),'%')
+			</if>
+			<if test="categoryId!=null">
+				and t.category_id=#{categoryId,jdbcType=VARCHAR}
+			</if>
+			<if test="publishedUser!=null">
+				and t.published_user=#{publishedUser}
+			</if>
+			<if test="publishedPhone!=null">
+				and t.published_phone like concat(concat('%',#{publishedPhone}),'%')
+			</if>
+			<if test="publishedName!=null">
+				and t.published_name like concat(concat('%',#{publishedName}),'%')
+			</if>
+			<if test="responseId!=null">
+				and t.response_id = #{responseId}
+			</if>
+			<if test="demandStatus!=null">
+				and t.demand_status = #{demandStatus}
+			</if>
+			<if test="pushlishedStartTime!=null">
+				and UNIX_TIMESTAMP(t.pushlished_time) &gt;
+				UNIX_TIMESTAMP(DATE_FORMAT(#{pushlishedStartTime},'%Y-%m-%d
+				%H:%i:%s'))
+			</if>
+			<if test="pushlishedEndTime!=null">
+				and UNIX_TIMESTAMP(t.pushlished_time) &lt;
+				UNIX_TIMESTAMP(DATE_FORMAT(#{pushlishedEndTime},'%Y-%m-%d
+				%H:%i:%s'))
+			</if>
+		</where>
+	</select>
+	<!-- 按状态以及品类统计每一天的数量 -->
+	<select id="countByStatusAndCatrgory" parameterType="java.util.Map"
+		resultMap="countVo">
+
+		select
+		count(1) count,temp.date date
+		from(
+
+		select DATE_FORMAT(t2.create_time,'%Y-%m-%d') date,t2.demand_status
+		demand_status,t1.category_id category
+		from t_demand t1,t_demand_log t2
+		where t1.id=t2.demand_id and t1.category_id=#{categoryId}
+		and t2.demand_status=#{demandStatus}
+		and t2.create_time
+		BETWEEN #{startTime} and #{endTime}
+		) as temp
+		GROUP BY temp.date
+	</select>
+	<!-- 查找总数 -->
+	<select id="findCount" resultType="Integer" parameterType="com.icloud.model.demand.Demand">
+	  select count(1) from t_demand t
+	  <where>
+			<if test="productName!=null">
+				and t.product_name like concat(concat('%',#{productName}),'%')
+			</if>
+			<if test="categoryId!=null">
+				and t.category_id=#{categoryId,jdbcType=VARCHAR}
+			</if>
+			<if test="publishedUser!=null">
+				and t.published_user=#{publishedUser}
+			</if>
+			<if test="publishedPhone!=null">
+				and t.published_phone like concat(concat('%',#{publishedPhone}),'%')
+			</if>
+			<if test="publishedName!=null">
+				and t.published_name like concat(concat('%',#{publishedName}),'%')
+			</if>
+			<if test="responseId!=null">
+				and t.response_id = #{responseId}
+			</if>
+			<if test="demandStatus!=null">
+				and t.demand_status = #{demandStatus}
+			</if>
+			<if test="pushlishedStartTime!=null">
+				and UNIX_TIMESTAMP(t.pushlished_time) &gt;
+				UNIX_TIMESTAMP(DATE_FORMAT(#{pushlishedStartTime},'%Y-%m-%d
+				%H:%i:%s'))
+			</if>
+			<if test="pushlishedEndTime!=null">
+				and UNIX_TIMESTAMP(t.pushlished_time) &lt;
+				UNIX_TIMESTAMP(DATE_FORMAT(#{pushlishedEndTime},'%Y-%m-%d
+				%H:%i:%s'))
+			</if>
+		</where>
+	</select>
+	
+	
+</mapper>

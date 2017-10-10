@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icloud.dao.category.CategoryMapper">
+	<resultMap id="BaseResultMap" type="com.icloud.model.category.Category">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="category_name" property="categoryName"
+			jdbcType="VARCHAR" />
+		<result column="parent_id" property="parentId" jdbcType="VARCHAR" />
+		<result column="delete_status" property="deletStatus" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, category_name, parent_id,delete_status
+	</sql>
+	<select id="findForObject" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from t_category
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByKey" parameterType="java.lang.String">
+		delete from t_category
+		where id = #{id,jdbcType=VARCHAR}
+	</delete>
+
+	<insert id="save" parameterType="com.icloud.model.category.Category">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			select
+			replace(uuid(),'-','') from dual
+		</selectKey>
+		insert into t_category (id, category_name, parent_id,delete_status)
+		values (#{id,jdbcType=VARCHAR}, #{categoryName,jdbcType=VARCHAR},
+		#{parentId,jdbcType=VARCHAR},#{deletStatus}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.icloud.model.category.Category">
+		update t_category
+		<set>
+			<if test="categoryName != null">
+				category_name = #{categoryName,jdbcType=VARCHAR},
+			</if>
+			<if test="deletStatus != null">
+				delete_status = #{deletStatus,jdbcType=VARCHAR},
+			</if>
+			<if test="parentId != null">
+				parent_id = #{parentId,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+
+     <select id="findForList" parameterType="com.icloud.model.category.Category" resultMap="BaseResultMap">
+       select 
+       <include refid="Base_Column_List"/>
+       from t_category t
+       <where>
+          <if test="categoryName != null">
+             and t.category_name like concat(concat('%',#{categoryName}),'%')
+          </if>
+          <if test="parentId != null">
+             and t.parent_id=#{parentId,jdbcType=VARCHAR}
+          </if>
+          <if test="deletStatus != null">
+			and	delete_status = #{deletStatus,jdbcType=VARCHAR}
+			</if>
+       </where>
+     </select>
+     
+     <select id="selectSkuCategory" parameterType="String" resultMap="BaseResultMap">
+         select t1.* from t_category t1 INNER JOIN t_sku_category t2 ON t1.id=t2.category_id and t1.delete_status = '1' and t2.user_id=#{skuId}
+     </select>
+     
+     <insert id="addSkuRelated" parameterType="java.util.List">
+        insert into t_sku_category 
+        (user_id,category_id)
+		VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.userId},#{item.categoryId})
+		</foreach>
+     </insert>
+     
+     <delete id="deleteSkuRelated" parameterType="String">
+      delete from t_sku_category 
+      where user_id=#{skuId}
+     </delete>
+   
+     <select id="checkName" parameterType="String" resultMap="BaseResultMap">
+        select  
+        <include refid="Base_Column_List"/>
+         from t_category where category_name=#{categoryName}
+     </select>
+     
+   
+   
+</mapper>

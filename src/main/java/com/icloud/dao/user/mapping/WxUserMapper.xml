@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.icloud.dao.user.WxUserMapper">
+	<resultMap id="BaseResultMap" type="com.icloud.model.user.WxUser">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="nick" jdbcType="VARCHAR" property="nick" />
+		<result column="wx_head_img" jdbcType="VARCHAR" property="wxHeadImg" />
+		<result column="open_id" jdbcType="VARCHAR" property="openId" />
+		<result column="current_type" jdbcType="VARCHAR" property="currentType" />
+	    <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+	</resultMap>
+	
+	<resultMap type="com.icloud.common.dto.vo.CountVo" id="countVo">
+	  <result column="item" property="item" jdbcType="VARCHAR"/>
+	  <result column="count" property="count" jdbcType="INTEGER"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, nick, wx_head_img, open_id, current_type,create_time
+	</sql>
+
+	<select id="findForObject" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_wx_user
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+	
+	
+	<insert id="save" parameterType="com.icloud.model.user.WxUser">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			select
+			replace(uuid(),'-','') from dual
+		</selectKey>
+		insert into t_wx_user (id, nick, wx_head_img, open_id, current_type,create_time) values
+		(#{id,jdbcType=VARCHAR}, #{nick,jdbcType=VARCHAR},
+		#{wxHeadImg,jdbcType=VARCHAR}, #{openId,jdbcType=VARCHAR}, #{currentType,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP})
+	</insert>
+
+	<update id="update" parameterType="com.icloud.model.user.WxUser">
+		update t_wx_user
+		<set>
+			<if test="nick != null">
+				nick = #{nick,jdbcType=VARCHAR},
+			</if>
+			<if test="wxHeadImg != null">
+				wx_head_img = #{wxHeadImg,jdbcType=VARCHAR},
+			</if>
+			<if test="openId != null">
+				open_id = #{openId,jdbcType=VARCHAR},
+			</if>
+			<if test="currentType != null">
+				current_type = #{currentType,jdbcType=VARCHAR},
+			</if>
+			
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+
+    <select id="findByOpenId" parameterType="String" resultMap="BaseResultMap">
+       select 
+      <include refid="Base_Column_List" />
+       from t_wx_user t 
+       where t.open_id=#{openId,jdbcType=VARCHAR}
+    </select>
+     <select id="findForList" parameterType="com.icloud.model.user.WxUser" resultMap="BaseResultMap">
+       select 
+       <include refid="Base_Column_List" />
+       from t_wx_user t
+       <where>
+		  <if test="nick!=null">
+				and t.nick like concat(concat('%',#{nick}),'%')
+		  </if>
+		  <if test="openId!=null">
+				and t.open_id like concat(concat('%',#{openId}),'%')
+		  </if>
+		  <if test="currentType!=null">
+				and t.current_type=#{currentType}
+		  </if>
+		</where>
+    </select>
+    <!-- 统计时间段内每天的新增人数 -->
+    <select id="findCountByDays" parameterType="Map" resultMap="countVo">
+       select DATE_FORMAT(create_time,'%Y-%m-%d') item,COUNT(1) count from t_wx_user where create_time &gt; #{startTime} and create_time &lt;#{endTime}
+       group by DATE_FORMAT(create_time,'%Y-%m-%d')	
+    </select>
+       
+</mapper>

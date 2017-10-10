@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icloud.dao.demand.FollowMapper" >
+  <resultMap id="BaseResultMap" type="com.icloud.model.demand.Follow" >
+    <result column="demand_id" property="demandId" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    demand_id, user_id
+  </sql>
+  
+  <select id="checkIsFollow" parameterType="com.icloud.model.demand.Follow" resultType="Integer">
+   select count(1) from t_follow where user_id=#{userId} and demand_id=#{demandId}
+  </select>
+  
+   <delete id="unFollow" parameterType="com.icloud.model.demand.Follow">
+     delete from t_follow where user_id=#{userId} and demand_id=#{demandId}
+   </delete>
+   
+  <insert id="save" parameterType="com.icloud.model.demand.Follow" >
+    insert into t_follow (demand_id, user_id)
+    values (#{demandId,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR})
+  </insert>
+  
+  
+</mapper>

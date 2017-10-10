@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icloud.dao.bms.TadminRoleMapper" >
+  <resultMap id="BaseResultMap" type="com.icloud.model.bms.TadminRole" >
+    <result column="admin_id" property="adminId" jdbcType="VARCHAR" />
+    <result column="role_id" property="roleId" jdbcType="VARCHAR" />
+  </resultMap>
+  <delete id="delele" parameterType="java.lang.String">
+    delete from t_admin_role where admin_id=#{adminId}
+  </delete>
+  
+  <insert id="batchInsert" parameterType="java.util.List">
+		INSERT INTO t_admin_role (role_id, admin_id
+		)
+		VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.roleId},#{item.adminId})
+		</foreach>
+	</insert>
+  
+  <insert id="insert" parameterType="com.icloud.model.bms.TadminRole" >
+    insert into t_admin_role (admin_id, role_id)
+    values (#{adminId,jdbcType=VARCHAR}, #{roleId,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.icloud.model.bms.TadminRole" >
+    insert into t_admin_role
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="adminId != null" >
+        admin_id,
+      </if>
+      <if test="roleId != null" >
+        role_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="adminId != null" >
+        #{adminId,jdbcType=VARCHAR},
+      </if>
+      <if test="roleId != null" >
+        #{roleId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

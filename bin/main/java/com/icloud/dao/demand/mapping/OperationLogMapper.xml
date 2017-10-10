@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icloud.dao.demand.OperationLogMapper">
+	<resultMap id="BaseResultMap" type="com.icloud.model.demand.OperationLog">
+		<id column="id" property="id" jdbcType="VARCHAR" />
+		<result column="log_type" property="logType" jdbcType="VARCHAR" />
+		<result column="object_id" property="objectId" jdbcType="VARCHAR" />
+		<result column="ext_info" property="extInfo" jdbcType="VARCHAR" />
+		<result column="user_id" property="userId" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, log_type, object_id, ext_info,user_id,create_time
+	</sql>
+
+	<insert id="save" parameterType="com.icloud.model.demand.OperationLog">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			select
+			replace(uuid(),'-','') from dual
+		</selectKey>
+		insert into t_operationl_log (id, log_type, object_id,
+		ext_info,user_id,create_time)
+		values (#{id,jdbcType=VARCHAR},
+		#{logType,jdbcType=VARCHAR},
+		#{objectId,jdbcType=VARCHAR},
+		#{extInfo,jdbcType=VARCHAR},#{userId,jdbcType=VARCHAR},#{createTime,jdbcType=TIMESTAMP})
+	</insert>
+
+	<select id="findByObj" parameterType="String" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_operationl_log
+		where object_id=#{objectId}
+	</select>
+
+
+	<select id="findForList" parameterType="com.icloud.model.demand.OperationLog"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_operationl_log
+		<where>
+
+			<if test="logType != null">
+				and log_type = #{logType}
+			</if>
+			<if test="objectId != null">
+				and object_id = #{object_id}
+			</if>
+			<if test="userId!=null">
+				and user_id=#{userId}
+			</if>
+
+		</where>
+	</select>
+	<!-- 检查是否有新记录 针对留言 -->
+	<select id="hasNewLog" parameterType="com.icloud.model.demand.OperationLog"
+		resultType="Integer">
+		select count(1) from
+		(select max(t.create_time) time from t_comments t where
+		t.demand_id=#{objectId} ) as
+		t1 ,(select max(create_time) create_time from t_operationl_log where
+		user_id=#{userId} and log_type=#{logType} ) as t2 where
+		t1.time>t2.create_time
+
+	</select>
+
+
+</mapper>

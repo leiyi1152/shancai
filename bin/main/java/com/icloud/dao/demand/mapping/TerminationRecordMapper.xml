@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icloud.dao.demand.TerminationMapper" >
+  <resultMap id="BaseResultMap" type="com.icloud.model.demand.TerminationRecord" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="apply_reson" property="applyReson" jdbcType="VARCHAR" />
+    <result column="pic_credentials" property="picCredentials" jdbcType="VARCHAR" />
+    <result column="apply_user" property="applyUser" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="demand_id" property="demandId" jdbcType="VARCHAR" />
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+    <result column="refuse_reason" property="refuseReason" jdbcType="VARCHAR" />
+    <result column="apply_role" property="applyRole" jdbcType="VARCHAR"/>
+    <collection property="user" column="apply_user" select="com.icloud.dao.user.UserMapper.findForObject"/>
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    id, apply_reson, pic_credentials, apply_user, status, create_time, demand_id, modify_time,refuse_reason,apply_role
+  </sql>
+  
+  <insert id="save" parameterType="com.icloud.model.demand.TerminationRecord" >
+    <selectKey keyProperty="id" order="BEFORE" resultType="String">
+			select
+			replace(uuid(),'-','') from dual
+		</selectKey>
+    insert into t_termination_record (id, apply_reson, pic_credentials, apply_user, status, create_time, demand_id, modify_time,refuse_reason,apply_role)
+    values (#{id,jdbcType=VARCHAR}, #{applyReson,jdbcType=VARCHAR}, #{picCredentials,jdbcType=VARCHAR}, 
+      #{applyUser,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},#{demandId,jdbcType=VARCHAR}, #{modifyTime,jdbcType=TIMESTAMP},#{refuseReason,jdbcType=VARCHAR}
+      ,#{applyRole,jdbcType=VARCHAR}
+      )
+  </insert>
+  
+  <select id="findByDemand" parameterType="String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_termination_record
+    where demand_id=#{demandId}
+  </select>
+  
+  <update id="update" parameterType="com.icloud.model.demand.TerminationRecord">
+    update t_termination_record
+    <set>
+       <if test="applyReson != null">
+          apply_reson = #{applyReson},
+       </if>
+       <if test="picCredentials != null">
+          pic_credentials = #{picCredentials},
+       </if>
+       <if test="applyUser != null">
+          apply_user = #{applyUser},
+       </if>
+       <if test="status != null">
+          status = #{status},
+       </if>
+       <if test="createTime != null">
+          create_time = #{createTime},
+       </if>
+       <if test="demandId != null">
+          demand_id = #{demandId},
+       </if>
+       <if test="modifyTime != null">
+          modify_time = #{modifyTime},
+       </if>
+        <if test="refuseReason != null">
+          refuse_reason = #{refuseReason},
+       </if>
+    </set>
+  </update>
+  <select id="findForList" parameterType="com.icloud.model.demand.TerminationRecord" resultMap="BaseResultMap">
+      select 
+      <include refid="Base_Column_List" />
+      from t_termination_record
+      <where>
+       <if test="applyUser != null">
+          and apply_user = #{applyUser}
+       </if>
+       <if test="status != null">
+           and status = #{status}
+       </if>
+       <if test="demandId != null">
+          and demand_id = #{demandId}
+       </if>
+      </where>
+   order by create_time desc
+  </select>
+  
+</mapper>

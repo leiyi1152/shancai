@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icloud.dao.demand.CommentsMapper" >
+  <resultMap id="BaseResultMap" type="com.icloud.model.demand.Comments" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="nick" property="nick" jdbcType="VARCHAR" />
+    <result column="head_img" property="headImg" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="pictures" property="pictures" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="demand_id" property="demandId" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    id, user_id, nick, head_img, content, pictures, create_time, demand_id
+  </sql>
+  
+  <insert id="save" parameterType="com.icloud.model.demand.Comments" >
+    <selectKey keyProperty="id" order="BEFORE" resultType="String">
+			select
+			replace(uuid(),'-','') from dual
+		</selectKey>
+    insert into t_comments (id, user_id, nick, 
+      head_img, content, pictures, 
+      create_time, demand_id)
+    values (#{id,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{nick,jdbcType=VARCHAR}, 
+      #{headImg,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, #{pictures,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{demandId,jdbcType=VARCHAR})
+  </insert>
+  
+  <select id="findByDemand" parameterType="String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_comments
+    where demand_id=#{demandId}
+  </select>
+  
+</mapper>

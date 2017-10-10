@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icloud.dao.demand.DemandLogMapper" >
+  <resultMap id="BaseResultMap" type="com.icloud.model.demand.DemandLog" >
+   <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="demand_id" property="demandId" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="log_info" property="logInfo" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="demand_status" property="demandStatus" jdbcType="VARCHAR" />
+    <collection property="user" column="user_id" select="com.icloud.dao.user.UserMapper.findForObject" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, demand_id, user_id, log_info, create_time, demand_status
+  </sql>
+  
+ <insert id="save" parameterType="com.icloud.model.demand.DemandLog" >
+    <selectKey keyProperty="id" order="BEFORE" resultType="String">
+			select
+			replace(uuid(),'-','') from dual
+		</selectKey>
+    insert into t_demand_log (id, demand_id, user_id, 
+      log_info, create_time, demand_status
+      )
+    values (#{id,jdbcType=VARCHAR}, #{demandId,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, 
+      #{logInfo,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{demandStatus,jdbcType=VARCHAR}
+      )
+  </insert>
+  <select id="findByDemand" parameterType="String" resultMap="BaseResultMap">
+     select 
+    <include refid="Base_Column_List" />
+   from t_demand_log 
+     where demand_id=#{demandId}
+  </select>
+  
+</mapper>

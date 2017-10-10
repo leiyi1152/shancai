@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.icloud.dao.user.SkuImportMapper">
+	<resultMap id="BaseResultMap" type="com.icloud.model.user.SkuImport">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="phone" jdbcType="VARCHAR" property="phone" />
+		<result column="name" jdbcType="VARCHAR" property="name" />
+		<result column="is_bind" jdbcType="VARCHAR" property="isBind" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,phone, name,is_bind
+	</sql>
+
+	<select id="findCount" parameterType="com.icloud.model.user.SkuImport"
+		resultType="Integer">
+		select count(1) from t_sku_import where phone=#{phone} and
+		name=#{name}
+	</select>
+
+	<select id="findForObject" parameterType="com.icloud.model.user.SkuImport"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_sku_import where phone=#{phone} and name=#{name}
+	</select>
+	<select id="findForKey" parameterType="String" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_sku_import
+		where id=#{id}
+	</select>
+	<delete id="delete" parameterType="com.icloud.model.user.SkuImport">
+		delete from t_sku_import
+		where
+		phone= #{phone,jdbcType=VARCHAR} and name=#{name}
+	</delete>
+
+	<delete id="deleteByKey" parameterType="com.icloud.model.user.SkuImport">
+		delete from t_sku_import
+		where
+		id=#{id}
+	</delete>
+
+	<insert id="bathInsert" parameterType="java.util.List">
+		insert into t_sku_import(id,phone,name,is_bind) values
+		<foreach collection="list" item="s" separator="," index="index">
+			(replace(uuid(),'-',''),#{s.phone,jdbcType=VARCHAR},#{s.name,jdbcType=VARCHAR},#{s.isBind,jdbcType=VARCHAR})
+		</foreach>
+	</insert>
+
+	<update id="update" parameterType="com.icloud.model.user.SkuImport">
+		update t_sku_import
+		<set>
+			<if test="name != null">
+				name = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="phone != null">
+				phone = #{phone,jdbcType=VARCHAR},
+			</if>
+			<if test="isBind != null">
+				is_bind = #{isBind,jdbcType=VARCHAR},
+			</if>
+
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="findForList" parameterType="com.icloud.model.user.SkuImport"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_sku_import t
+		<where>
+			<if test="name!=null">
+				and t.name like concat(concat('%',#{name}),'%')
+			</if>
+			<if test="phone!=null">
+				and t.phone like concat(concat('%',#{phone}),'%')
+			</if>
+			<if test="isBind!=null">
+				and t.is_bind=#{isBind}
+			</if>
+		</where>
+	</select>
+
+</mapper>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icloud.dao.bms.TadminMapper">
+	<resultMap id="BaseResultMap" type="com.icloud.model.bms.Tadmin">
+		<result column="id" property="id" jdbcType="VARCHAR" />
+		<result column="account" property="account" jdbcType="VARCHAR" />
+		<result column="pass_word" property="passWord" jdbcType="VARCHAR" />
+		<result column="is_lock" property="isLock" jdbcType="VARCHAR" />
+		<result column="password_prompt" property="passwordPrompt"
+			jdbcType="VARCHAR" />
+		<result column="create_date" property="createDate" />
+	</resultMap>
+	<!-- 通过账号密码查找 -->
+	<select id="findForConditions" parameterType="com.icloud.model.bms.Tadmin"
+		resultMap="BaseResultMap">
+		select t.id, t.account, t.pass_word,
+		t.is_lock, t.password_prompt,t.create_date from t_admin t where
+		t.account=#{account} and t.pass_word=#{passWord}
+	</select>
+
+	<!-- 通过账号密码查找 -->
+	<select id="findCountByAccount" parameterType="com.icloud.model.bms.Tadmin"
+		resultType="Integer">
+		select count(1) from t_admin t where t.account=#{account}
+	</select>
+
+	<!-- 条件统计总记录数 -->
+	<select id="findCount" parameterType="com.icloud.model.bms.Tadmin"
+		resultType="Integer">
+		select count(1) from t_admin t
+		<where>
+			<if test="account!=null">
+				and t.account like concat(concat('%',#{account}),'%')
+			</if>
+		</where>
+	</select>
+
+	<select id="findForList" parameterType="com.icloud.model.bms.Tadmin"
+		resultMap="BaseResultMap">
+		select t.id, t.account, t.pass_word,
+		t.is_lock, t.password_prompt,t.create_date from t_admin t
+		<where>
+			<if test="account!=null">
+				and t.account like concat(concat('%',#{account}),'%')
+			</if>
+		</where>
+		ORDER BY t.create_date desc limit #{startRow},#{pageSize}
+	</select>
+	
+	<select id="findByPage" parameterType="com.icloud.model.bms.Tadmin"
+		resultMap="BaseResultMap">
+		select t.id, t.account, t.pass_word,
+		t.is_lock, t.password_prompt,t.create_date from t_admin t
+		<where>
+			<if test="account!=null">
+				and t.account like concat(concat('%',#{account}),'%')
+			</if>
+		</where>
+	</select>
+
+	<delete id="deleteByKey" parameterType="java.lang.String">
+		delete from t_admin where id=#{id}
+	</delete>
+
+	<select id="findForObject" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select t.* from t_admin t where t.id=#{id}
+	</select>
+
+	<update id="update" parameterType="com.icloud.model.bms.Tadmin">
+		update t_admin
+		<set>
+
+			<if test="passWord != null">
+				pass_word = #{passWord,jdbcType=VARCHAR},
+			</if>
+			<if test="isLock != null">
+				is_lock = #{isLock,jdbcType=VARCHAR},
+			</if>
+			<if test="passwordPrompt != null">
+				password_prompt = #{passwordPrompt,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+
+	<insert id="save" parameterType="com.icloud.model.bms.Tadmin">
+		<selectKey keyProperty="id" resultType="String" order="BEFORE">
+			select replace(uuid(),'-','') from dual
+		</selectKey>
+		insert into t_admin (id, account, pass_word,
+		is_lock, password_prompt,create_date)
+		values (#{id}, #{account,jdbcType=VARCHAR}, #{passWord,jdbcType=VARCHAR},
+		#{isLock,jdbcType=VARCHAR},
+		#{passwordPrompt,jdbcType=VARCHAR},#{createDate})
+	</insert>
+
+</mapper>

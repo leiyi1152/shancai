@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.icloud.dao.user.UserMapper">
+	<resultMap id="BaseResultMap" type="com.icloud.model.user.User">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="name" jdbcType="VARCHAR" property="name" />
+		<result column="phone" jdbcType="VARCHAR" property="phone" />
+		<result column="nick" jdbcType="VARCHAR" property="nick" />
+		<result column="wx_head_img" jdbcType="VARCHAR" property="wxHeadImg" />
+		<result column="company_name" jdbcType="VARCHAR" property="companyName" />
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+	    <result column="wx_user_id" jdbcType="VARCHAR" property="wxUserId" />
+	    <result column="status" property="status" jdbcType="VARCHAR"/>
+	</resultMap>
+	<resultMap type="com.icloud.common.dto.vo.CountVo" id="countVo">
+		<result column="item" property="item" jdbcType="VARCHAR" />
+		<result column="count" property="count" jdbcType="INTEGER" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, wx_user_id,nick,wx_head_img,name, phone, company_name
+		,create_time,status
+	</sql>
+
+	<select id="findForObject" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_user
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByKey" parameterType="java.lang.String">
+		delete from t_user
+		where
+		id = #{id,jdbcType=VARCHAR}
+	</delete>
+
+	<insert id="save" parameterType="com.icloud.model.user.User">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			select
+			replace(uuid(),'-','') from dual
+		</selectKey>
+		insert into t_user (id,wx_user_id,nick,wx_head_img,name,
+		phone, company_name,create_time,status) values
+		(#{id,jdbcType=VARCHAR},#{wxUserId},#{nick,jdbcType=VARCHAR},
+		#{wxHeadImg,jdbcType=VARCHAR},
+		#{name,jdbcType=VARCHAR},
+		#{phone,jdbcType=VARCHAR},
+		#{companyName,jdbcType=VARCHAR},#{createTime,jdbcType=TIMESTAMP},#{status})
+	</insert>
+
+	<update id="update" parameterType="com.icloud.model.user.User">
+		update t_user
+		<set>
+			<if test="name != null">
+				name = #{name,jdbcType=VARCHAR},
+			</if>
+
+			<if test="phone != null">
+				phone = #{phone,jdbcType=VARCHAR},
+			</if>
+			<if test="companyName != null">
+				company_name = #{companyName,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=VARCHAR},
+			</if>
+            	<if test="createTime != null">
+				create_Time = #{createTime,jdbcType=VARCHAR},
+			</if>
+			<if test="nick != null">
+				nick = #{nick,jdbcType=VARCHAR},
+			</if>
+			<if test="wxHeadImg != null">
+				wx_head_img = #{wxHeadImg,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+
+	<select id="findByWxUser" parameterType="String" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_user t
+		where t.wx_user_id=#{wxUserId,jdbcType=VARCHAR}
+	</select>
+	<select id="findByPhone" parameterType="String" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_user t
+		where t.phone=#{phone,jdbcType=VARCHAR}
+	</select>
+	<select id="findForList" parameterType="com.icloud.model.user.User"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_user t
+		<where>
+		    <if test="status != null">
+				and status = #{status,jdbcType=VARCHAR}
+			</if>
+			<if test="name!=null">
+				and t.name like concat(concat('%',#{name}),'%')
+			</if>
+			<if test="phone!=null">
+				and t.phone like concat(concat('%',#{phone}),'%')
+			</if>
+			<if test="companyName!=null">
+				and t.company_name like
+				concat(concat('%',#{companyName}),'%')
+			</if>
+		</where>
+	</select>
+ <!-- 统计时间段内每天的新增人数 -->
+    <select id="findCountByDays" parameterType="Map" resultMap="countVo">
+       select DATE_FORMAT(create_time,'%Y-%m-%d') item,COUNT(1) count from t_user where create_time &gt; #{startTime} and create_time &lt;#{endTime}
+       and status=#{status} group by DATE_FORMAT(create_time,'%Y-%m-%d')	
+    </select>
+ <select id="findCount" parameterType="com.icloud.model.user.User" resultType="Integer">
+        select count(1) from t_user t
+       <where>
+			<if test="status!=null">
+				and t.status=#{status}
+			</if>
+		</where>
+    </select>
+</mapper>

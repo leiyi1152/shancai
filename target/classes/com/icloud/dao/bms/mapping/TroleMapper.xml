@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icloud.dao.bms.TroleMapper">
+	<resultMap id="BaseResultMap" type="com.icloud.model.bms.Trole">
+		<result column="id" property="id" jdbcType="VARCHAR" />
+		<result column="role_name" property="roleName" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<select id="findCount" parameterType="com.icloud.model.bms.Trole"
+		resultType="Integer">
+		select count(1) from t_role t
+		<where>
+			<if test="roleName!=null">
+				and t.role_name like concat(concat('%',#{roleName}),'%')
+			</if>
+		</where>
+	</select>
+
+	<select id="findForList" parameterType="com.icloud.model.bms.Trole"
+		resultMap="BaseResultMap">
+		select t.* from t_role t
+		<where>
+			<if test="roleName!=null">
+				and t.role_name like concat(concat('%',#{roleName}),'%')
+			</if>
+		</where>
+		limit #{startRow},#{pageSize}
+	</select>
+
+	<select id="findForObject" parameterType="String" resultMap="BaseResultMap">
+		select t.id,t.role_name from t_role t where t.id=#{id}
+	</select>
+
+	<select id="selectCountByName" parameterType="String"
+		resultType="Integer">
+		select count(1) from t_role t where t.role_name=#{roleName}
+	</select>
+
+	<select id="selectByAdmin" parameterType="String" resultMap="BaseResultMap">
+		select t.id,t.role_name from t_role t ,t_admin_role ar where
+		t.id=ar.role_id and ar.admin_id=#{adminId}
+	</select>
+	
+	<select id="selectAll"  resultMap="BaseResultMap">
+		select t.id,t.role_name from t_role t 
+	</select>
+
+	<delete id="deleteByKey" parameterType="java.lang.String">
+		delete from t_role where id=#{id}
+	</delete>
+
+	<insert id="save" parameterType="com.icloud.model.bms.Trole"
+		keyProperty="id">
+		<selectKey keyProperty="id" resultType="String" order="BEFORE">
+		 select replace(uuid(),'-','') from dual
+		</selectKey>
+		insert into t_role (id, role_name)
+		values (#{id}, #{roleName,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.icloud.model.bms.Trole">
+		insert into t_role
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="roleName != null">
+				role_name,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				replace(uuid(),'-',''),
+			</if>
+			<if test="roleName != null">
+				#{roleName,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+</mapper>

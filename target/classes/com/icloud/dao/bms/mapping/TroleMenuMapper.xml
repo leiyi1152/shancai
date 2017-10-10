@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icloud.dao.bms.TroleMenuMapper">
+	<resultMap id="BaseResultMap" type="com.icloud.model.bms.TroleMenu">
+		<result column="id" property="id" jdbcType="VARCHAR" />
+		<result column="role_id" property="roleId" jdbcType="VARCHAR" />
+		<result column="menu_id" property="menuId" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<delete id="delete" parameterType="com.icloud.model.bms.TroleMenu">
+		delete from t_role_menu
+		<where>
+			<if test="null!=menuId">
+				menu_id=#{menuId}
+			</if>
+			<if test="null!=roleId">
+				or role_id=#{roleId}
+			</if>
+		</where>
+	</delete>
+	<insert id="batchInsert" parameterType="java.util.List">
+		INSERT INTO t_role_menu (id, role_id, menu_id
+		)
+		VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(replace(uuid(),'-',''),#{item.roleId},#{item.menuId})
+		</foreach>
+	</insert>
+
+	<insert id="insert" parameterType="com.icloud.model.bms.TroleMenu">
+		insert into t_role_menu (id,
+		role_id, menu_id
+		)
+		values (replace(uuid(),'-',''),
+		#{roleId,jdbcType=VARCHAR},
+		#{menuId,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<insert id="insertSelective" parameterType="com.icloud.model.bms.TroleMenu">
+		insert into t_role_menu
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="roleId != null">
+				role_id,
+			</if>
+			<if test="menuId != null">
+				menu_id,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=VARCHAR},
+			</if>
+			<if test="roleId != null">
+				#{roleId,jdbcType=VARCHAR},
+			</if>
+			<if test="menuId != null">
+				#{menuId,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+</mapper>

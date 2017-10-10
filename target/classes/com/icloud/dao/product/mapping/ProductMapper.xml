@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.icloud.dao.product.ProductMapper">
+	<resultMap id="BaseResultMap" type="com.icloud.model.product.Product">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="product_name" jdbcType="VARCHAR" property="productName" />
+		<result column="product_desc" jdbcType="VARCHAR" property="productDesc" />
+		<result column="product_pics" jdbcType="VARCHAR" property="productPics" />
+		<result column="category_id" property="categoryId" jdbcType="VARCHAR" />
+		<collection property="category" column="category_id" select="com.icloud.dao.category.CategoryMapper.findForObject" fetchType="lazy" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, product_name, product_desc, product_pics,category_id
+	</sql>
+
+	<select id="findForObject" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_product
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByKey" parameterType="String">
+	 delete from t_product where id=#{id}
+	</delete>
+	
+	<insert id="save" parameterType="com.icloud.model.product.Product">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			select
+			replace(uuid(),'-','') from dual
+		</selectKey>
+		insert into t_product (id, product_name, product_desc, product_pics,category_id) values
+		(#{id,jdbcType=VARCHAR}, #{productName,jdbcType=VARCHAR},
+		#{productDesc,jdbcType=VARCHAR}, #{productPics,jdbcType=VARCHAR},#{categoryId})
+	</insert>
+
+	<update id="update" parameterType="com.icloud.model.product.Product">
+		update t_product
+		<set>
+			<if test="productName != null">
+				product_name = #{productName,jdbcType=VARCHAR},
+			</if>
+			<if test="productDesc != null">
+				product_desc = #{productDesc,jdbcType=VARCHAR},
+			</if>
+			<if test="productPics != null">
+				product_pics = #{productPics,jdbcType=VARCHAR},
+			</if>
+			<if test="categoryId != null">
+				category_id = #{categoryId,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+     <select id="findForList" parameterType="com.icloud.model.product.Product" resultMap="BaseResultMap">
+       select 
+       <include refid="Base_Column_List" />
+       from t_product
+       <where>
+		    <if test="productName != null">
+				and product_name like concat(concat('%',#{productName}),'%')
+			</if>
+			 <if test="categoryId != null">
+				and category_id=#{categoryId}
+			</if>
+		</where>
+    </select>
+</mapper>

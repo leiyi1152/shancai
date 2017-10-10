@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.icloud.dao.user.SkuUserMapper">
+	<resultMap id="BaseResultMap" type="com.icloud.model.user.SkuUser">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="sku_name" jdbcType="VARCHAR" property="skuName" />
+		<result column="sku_phone" jdbcType="VARCHAR" property="skuPhone" />
+		<result column="sku_company_name" jdbcType="VARCHAR" property="skuCompanyName" />
+	    <result column="wx_user_id" jdbcType="VARCHAR" property="wxUserId" />
+	    <result column="status" property="status" jdbcType="VARCHAR" />
+	    <result column="nick" jdbcType="VARCHAR" property="nick" />
+		<result column="wx_head_img" jdbcType="VARCHAR" property="wxHeadImg" />
+	</resultMap>
+
+	<resultMap type="com.icloud.common.dto.vo.CountVo" id="countVo">
+		<result column="item" property="item" jdbcType="VARCHAR" />
+		<result column="count" property="count" jdbcType="INTEGER" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,wx_user_id,nick,wx_head_img,sku_name,sku_phone,sku_company_name,create_time,status
+	</sql>
+
+	<select id="findForObject" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_sku_user
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByKey" parameterType="java.lang.String">
+		delete from t_sku_user
+		where
+		id = #{id,jdbcType=VARCHAR}
+	</delete>
+
+	<insert id="save" parameterType="com.icloud.model.user.SkuUser">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			select
+			replace(uuid(),'-','') from dual
+		</selectKey>
+		insert into t_sku_user
+		(id,wx_user_id,nick,wx_head_img,sku_name,sku_phone,sku_company_name,create_time,status) values
+		(#{id,jdbcType=VARCHAR},#{wxUserId},#{nick,jdbcType=VARCHAR},
+		#{wxHeadImg,jdbcType=VARCHAR},#{skuName,jdbcType=VARCHAR},#{skuPhone,jdbcType=VARCHAR},#{skuCompanyName,jdbcType=VARCHAR},#{createTime,jdbcType=TIMESTAMP},#{status})
+	</insert>
+
+	<update id="update" parameterType="com.icloud.model.user.SkuUser">
+		update t_sku_user
+		<set>
+			<if test="skuName != null">
+				sku_name = #{skuName,jdbcType=VARCHAR},
+			</if>
+			<if test="wxUserId != null">
+				wx_user_id = #{wxUserId,jdbcType=VARCHAR},
+			</if>
+			<if test="skuPhone!= null">
+				sku_phone=#{skuPhone,jdbcType=VARCHAR},
+			</if>
+			<if test="skuCompanyName != null">
+				sku_company_name = #{skuCompanyName,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime != null">
+				create_Time = #{createTime,jdbcType=VARCHAR},
+			</if>
+			<if test="nick != null">
+				nick = #{nick,jdbcType=VARCHAR},
+			</if>
+			<if test="wxHeadImg != null">
+				wx_head_img = #{wxHeadImg,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="findForList" parameterType="com.icloud.model.user.SkuUser"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_sku_user t
+		<where>
+		     <if test="status != null">
+				and status = #{status,jdbcType=VARCHAR}
+			</if>
+		     
+			<if test="skuCompanyName!=null">
+				and t.sku_company_name like
+				concat(concat('%',#{skuCompanyName}),'%')
+			</if>
+			<if test="skuName!=null">
+				and t.sku_name like concat(concat('%',#{skuName}),'%')
+			</if>
+			<if test="skuPhone!=null">
+				and t.sku_phone like concat(concat('%',#{skuPhone}),'%')
+			</if>
+		</where>
+	</select>
+	<select id="findByPhone" parameterType="String" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_sku_user t
+		where t.sku_phone=#{phone,jdbcType=VARCHAR}
+	</select>
+	<select id="findByWxUser" parameterType="String" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_sku_user t
+		where t.wx_user_id=#{wxUserId,jdbcType=VARCHAR}
+	</select>
+	 <!-- 统计时间段内每天的新增人数 -->
+    <select id="findCountByDays" parameterType="Map" resultMap="countVo">
+       select DATE_FORMAT(create_time,'%Y-%m-%d') item,COUNT(1) count from t_sku_user where create_time &gt; #{startTime} and create_time &lt;#{endTime}
+       and status=#{status} group by DATE_FORMAT(create_time,'%Y-%m-%d')	
+    </select>
+    <select id="findCount" parameterType="com.icloud.model.user.SkuUser" resultType="Integer">
+        select count(1) from t_sku_user t
+       <where>
+			<if test="skuCompanyName!=null">
+				and t.sku_company_name like
+				concat(concat('%',#{skuCompanyName}),'%')
+			</if>
+			<if test="skuName!=null">
+				and t.sku_name like concat(concat('%',#{skuName}),'%')
+			</if>
+			<if test="skuPhone!=null">
+				and t.sku_phone like concat(concat('%',#{skuPhone}),'%')
+			</if>
+			<if test="status!=null">
+				and t.status=#{status}
+			</if>
+		</where>
+    </select>
+</mapper>

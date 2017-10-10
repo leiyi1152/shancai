@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.icloud.dao.sms.MsgRecordMapper">
+	<resultMap id="BaseResultMap" type="com.icloud.model.sms.MsgRecord">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="msg_content" jdbcType="VARCHAR" property="msgContent" />
+		<result column="type" jdbcType="VARCHAR" property="type" />
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+	    <result column="receive_obj" jdbcType="VARCHAR" property="receiveObj" />
+	    <result column="status" property="status" jdbcType="VARCHAR"/>
+	    <result column="url" property="url" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,msg_content,type,receive_obj,status,url,create_time,modify_time
+	</sql>
+
+	<insert id="save" parameterType="com.icloud.model.sms.MsgRecord">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			select
+			replace(uuid(),'-','') from dual
+		</selectKey>
+		insert into t_msg_record (id,msg_content,type,receive_obj,status,url,create_time,modify_time) values
+		(#{id,jdbcType=VARCHAR},#{msgContent},
+		#{type,jdbcType=VARCHAR},
+		#{receiveObj,jdbcType=VARCHAR},
+		#{status,jdbcType=VARCHAR},#{url},#{createTime,jdbcType=TIMESTAMP},#{modifyTime,jdbcType=TIMESTAMP})
+	</insert>
+
+	<update id="update" parameterType="com.icloud.model.sms.MsgRecord">
+		update t_msg_record
+		<set>
+			<if test="msgContent != null">
+				msg_content = #{msgContent,jdbcType=VARCHAR},
+			</if>
+			<if test="modifyTime != null">
+				modify_time = #{modifyTime,jdbcType=VARCHAR},
+			</if>
+			
+			<if test="status != null">
+				status = #{status,jdbcType=VARCHAR},
+			</if>
+			<if test="url != null">
+				url = #{url,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<select id="findForList" parameterType="com.icloud.model.sms.MsgRecord"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_msg_record t
+		<where>
+			<if test="status!=null">
+				and t.status=#{status}
+			</if>
+		</where>
+	</select>
+
+
+</mapper>

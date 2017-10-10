@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icloud.dao.bms.TmenuMapper">
+	<resultMap id="BaseResultMap" type="com.icloud.model.bms.Tmenu">
+		<result column="id" property="id" jdbcType="VARCHAR" />
+		<result column="menu_name" property="menuName" jdbcType="VARCHAR" />
+		<result column="menu_url" property="menuUrl" jdbcType="VARCHAR" />
+		<result column="parent_id" property="parentId" jdbcType="VARCHAR" />
+		<result column="sort_num" property="sortNum" jdbcType="INTEGER" />
+		<collection property="parent" column="parent_id" select="com.icloud.dao.bms.TmenuMapper.findForObject" />
+	</resultMap>
+	<select id="selectMenuByUser" parameterType="com.icloud.model.bms.Tadmin"
+		resultMap="BaseResultMap">
+		select distinct t.id, t.menu_name, t.menu_url,
+		t.parent_id,
+		t.sort_num from t_menu t ,t_admin a,t_admin_role ar ,t_role_menu rm
+		where a.id=ar.admin_id and ar.role_id=rm.role_id and t.id=rm.menu_id
+		and a.id=#{id} order by t.sort_num asc
+	</select>
+	
+
+
+	<select id="findForList" parameterType="com.icloud.model.bms.Tmenu"
+		resultMap="BaseResultMap">
+		select t.id, t.menu_name,
+		t.menu_url,
+		t.parent_id, t.sort_num from
+		t_menu t
+		<where>
+			<if test="menuName!=null">
+				and t.menu_name like concat(concat('%',#{menuName}),'%')
+			</if>
+		</where>
+		ORDER BY t.sort_num ASC,t.parent_id asc limit #{startRow},#{pageSize}
+	</select>
+	<select id="findCount" parameterType="com.icloud.model.bms.Tmenu"
+		resultType="Integer">
+		select count(1) from t_menu t
+		<where>
+			<if test="menuName!=null">
+				and t.menu_name like concat(concat('%',#{menuName}),'%')
+			</if>
+		</where>
+	</select>
+	<select id="selectByRole" parameterType="String" resultMap="BaseResultMap">
+		select m.* from t_menu m,t_role r,t_role_menu rm where m.id=rm.menu_id
+		and rm.role_id=r.id and r.id=#{roleId}
+	</select>
+	<select id="selectAllList" resultMap="BaseResultMap">
+		select t.id, t.menu_name,
+		t.menu_url,
+		t.parent_id, t.sort_num from t_menu t order by t.sort_num
+		asc
+	</select>
+	<select id="findForObject" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select t.id, t.menu_name, t.menu_url,
+		t.parent_id, t.sort_num
+		from t_menu t where t.id=#{id}
+
+	</select>
+
+	<select id="selectParentMenu" resultMap="BaseResultMap">
+		select t.id,
+		t.menu_name, t.menu_url,
+		t.parent_id, t.sort_num from t_menu t where
+		t.parent_id='0'
+	</select>
+
+	<select id="selectCountByName" parameterType="java.lang.String"
+		resultType="Integer">
+		select count(1) from t_menu t where t.menu_name=#{menuName}
+	</select>
+
+	<select id="countByParent" parameterType="java.lang.String"
+		resultType="Integer">
+		select count(1) from t_menu t where t.parent_id=#{id}
+	</select>
+	<update id="update" parameterType="com.icloud.model.bms.Tmenu">
+		update t_menu
+		<set>
+
+			<if test="menuUrl != null">
+				menu_url = #{menuUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="parentId != null">
+				parent_id = #{parentId,jdbcType=VARCHAR},
+			</if>
+			<if test="sortNum != null">
+				sort_num = #{sortNum,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<delete id="deleteByKey" parameterType="java.lang.String">
+
+		delete from t_menu where
+		id=#{id}
+
+	</delete>
+
+	<insert id="save" parameterType="com.icloud.model.bms.Tmenu">
+		insert into t_menu (id,
+		menu_name, menu_url,
+		parent_id, sort_num)
+		values
+		(replace(uuid(),'-',''), #{menuName,jdbcType=VARCHAR},
+		#{menuUrl,jdbcType=VARCHAR},
+		#{parentId,jdbcType=VARCHAR},
+		#{sortNum,jdbcType=INTEGER})
+	</insert>
+	<insert id="insertSelective" parameterType="com.icloud.model.bms.Tmenu">
+		insert into t_menu
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="menuName != null">
+				menu_name,
+			</if>
+			<if test="menuUrl != null">
+				menu_url,
+			</if>
+			<if test="parentId != null">
+				parent_id,
+			</if>
+			<if test="sortNum != null">
+				sort_num,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				replace(uuid(),'-',''),
+			</if>
+			<if test="menuName != null">
+				#{menuName,jdbcType=VARCHAR},
+			</if>
+			<if test="menuUrl != null">
+				#{menuUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="parentId != null">
+				#{parentId,jdbcType=VARCHAR},
+			</if>
+			<if test="sortNum != null">
+				#{sortNum,jdbcType=INTEGER},
+			</if>
+		</trim>
+	</insert>
+</mapper>

@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.icloud.dao.user.UserMapper">
+	<resultMap id="BaseResultMap" type="com.icloud.model.user.User">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="nick" jdbcType="VARCHAR" property="nick" />
+		<result column="wx_head_img" jdbcType="VARCHAR" property="wxHeadImg" />
+		<result column="open_id" jdbcType="VARCHAR" property="openId" />
+		<result column="name" jdbcType="VARCHAR" property="name" />
+		<result column="current_type" jdbcType="VARCHAR" property="currentType" />
+		<result column="phone" jdbcType="VARCHAR" property="phone" />
+		<result column="company_name" jdbcType="VARCHAR" property="companyName" />
+		<result column="custom_head_img" jdbcType="VARCHAR" property="customHeadImg" />
+		<result column="user_status" jdbcType="VARCHAR" property="userStatus" />
+	    <result column="sku_status" jdbcType="VARCHAR" property="skuStatus"/>
+	    <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+	    <result column="sku_name" jdbcType="VARCHAR" property="skuName" />
+		<result column="sku_phone" jdbcType="VARCHAR" property="skuPhone" />
+	    <result column="sku_company_name" jdbcType="VARCHAR" property="skuCompanyName"/>
+	    <result column="buyer_bind_time"  jdbcType="TIMESTAMP" property="buyerBindTime"/>
+	    <result column="sku_bind_time"  jdbcType="TIMESTAMP" property="skuBindTime"/>
+	</resultMap>
+	
+	<resultMap type="com.icloud.model.user.CountVo" id="countVo">
+	  <result column="date" property="date" jdbcType="VARCHAR"/>
+	  <result column="count" property="count" jdbcType="INTEGER"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, nick, wx_head_img, open_id, name, current_type, phone, company_name,
+		custom_head_img,
+		user_status,sku_status,sku_name,sku_phone,sku_company_name,create_time,buyer_bind_time,sku_bind_time
+	</sql>
+
+	<select id="findForObject" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from t_user
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByKey" parameterType="java.lang.String">
+		delete from t_user
+		where id = #{id,jdbcType=VARCHAR}
+	</delete>
+	
+	<insert id="save" parameterType="com.icloud.model.user.User">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			select
+			replace(uuid(),'-','') from dual
+		</selectKey>
+		insert into t_user (id, nick, wx_head_img, open_id, name, current_type,
+		phone, company_name, custom_head_img, user_status,sku_status,sku_name,sku_phone,sku_company_name,create_time) values
+		(#{id,jdbcType=VARCHAR}, #{nick,jdbcType=VARCHAR},
+		#{wxHeadImg,jdbcType=VARCHAR}, #{openId,jdbcType=VARCHAR},
+		#{name,jdbcType=VARCHAR}, #{currentType,jdbcType=VARCHAR},
+		#{phone,jdbcType=VARCHAR}, #{companyName,jdbcType=VARCHAR},
+		#{customHeadImg,jdbcType=VARCHAR},#{userStatus,jdbcType=VARCHAR}
+		,#{skuStatus,jdbcType=VARCHAR},#{skuName,jdbcType=VARCHAR},#{skuPhone,jdbcType=VARCHAR},#{skuCompanyName,jdbcType=VARCHAR},#{createTime,jdbcType=TIMESTAMP})
+	</insert>
+
+	<update id="update" parameterType="com.icloud.model.user.User">
+		update t_user
+		<set>
+			<if test="nick != null">
+				nick = #{nick,jdbcType=VARCHAR},
+			</if>
+			<if test="wxHeadImg != null">
+				wx_head_img = #{wxHeadImg,jdbcType=VARCHAR},
+			</if>
+			<if test="openId != null">
+				open_id = #{openId,jdbcType=VARCHAR},
+			</if>
+			<if test="name != null">
+				name = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="currentType != null">
+				current_type = #{currentType,jdbcType=VARCHAR},
+			</if>
+			<if test="phone != null">
+				phone = #{phone,jdbcType=VARCHAR},
+			</if>
+			<if test="companyName != null">
+				company_name = #{companyName,jdbcType=VARCHAR},
+			</if>
+			<if test="customHeadImg != null">
+				custom_head_img = #{customHeadImg,jdbcType=VARCHAR},
+			</if>
+			<if test="userStatus != null">
+				user_status = #{userStatus,jdbcType=VARCHAR},
+			</if>
+			<if test="skuName != null">
+				sku_name = #{skuName,jdbcType=VARCHAR},
+			</if>
+			<if test="skuPhone!= null">
+				sku_phone=#{skuPhone,jdbcType=VARCHAR},
+			</if>
+			<if test="skuCompanyName != null">
+				sku_company_name = #{skuCompanyName,jdbcType=VARCHAR},
+			</if>
+			<if test="skuStatus != null">
+				sku_status = #{skuStatus,jdbcType=VARCHAR},
+			</if>
+			<if test="skuBindTime != null">
+				sku_bind_time = #{skuBindTime},
+			</if>
+			<if test="buyerBindTime != null">
+				buyer_bind_time= #{buyerBindTime},
+			</if>
+		</set>
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+
+    <select id="findByOpenId" parameterType="String" resultMap="BaseResultMap">
+       select 
+      <include refid="Base_Column_List" />
+       from t_user t 
+       where t.open_id=#{openId,jdbcType=VARCHAR}
+    </select>
+     <select id="findForList" parameterType="com.icloud.model.user.User" resultMap="BaseResultMap">
+       select 
+       <include refid="Base_Column_List" />
+       from t_user t
+       <where>
+		  <if test="nick!=null">
+				and t.nick like concat(concat('%',#{nick}),'%')
+		  </if>
+		  <if test="openId!=null">
+				and t.open_id like concat(concat('%',#{openId}),'%')
+		  </if>
+		  <if test="currentType!=null">
+				and t.current_type=#{currentType}
+		  </if>
+		  <if test="phone!=null">
+				and t.phone like concat(concat('%',#{phone}),'%')
+		  </if>
+		   <if test="userStatus!=null">
+				and t.user_status=#{userStatus}
+		  </if>
+		  <if test="skuStatus!=null">
+				and t.sku_status=#{skuStatus}
+		  </if>
+		  <if test="companyName!=null">
+				and t.company_name like concat(concat('%',#{companyName}),'%')
+		  </if>
+		  <if test="skuCompanyName!=null">
+				and t.sku_company_name like concat(concat('%',#{skuCompanyName}),'%')
+		  </if>
+		  <if test="skuName!=null">
+				and t.sku_name like concat(concat('%',#{skuName}),'%')
+		  </if>
+		  <if test="skuPhone!=null">
+				and t.sku_phone like concat(concat('%',#{skuPhone}),'%')
+		  </if>
+		</where>
+    </select>
+    
+     <select id="findList" parameterType="com.icloud.model.user.User" resultMap="BaseResultMap">
+       select 
+       <include refid="Base_Column_List" />
+       from t_user t
+       <where>
+		  
+		  <if test="currentType!=null">
+				and t.current_type=#{currentType}
+		  </if>
+		  <if test="phone!=null">
+				and (t.phone like concat(concat('%',#{phone}),'%') or sku_phone like concat(concat('%',#{phone}),'%'))
+		  </if>
+		  <if test="name!=null">
+				and (t.name like concat(concat('%',#{name}),'%') or t.sku_name like concat(concat('%',#{name}),'%'))
+		  </if>
+		  <if test="companyName!=null">
+				and (t.company_name like concat(concat('%',#{companyName}),'%') or t.sku_company_name like concat(concat('%',#{companyName}),'%'))
+		  </if>
+		 
+		</where>
+    </select>
+    
+    <select id="findByPhone" parameterType="String" resultMap="BaseResultMap">
+      select 
+      <include refid="Base_Column_List" />
+      from t_user t 
+      where t.phone=#{phone,jdbcType=VARCHAR}
+    </select>
+    
+     <select id="findBySkuPhone" parameterType="String" resultMap="BaseResultMap">
+      select 
+      <include refid="Base_Column_List" />
+      from t_user t 
+      where t.sku_phone=#{skuPhone,jdbcType=VARCHAR}
+    </select>
+
+     <select id="findCount" parameterType="com.icloud.model.user.User" resultType="Integer">
+        select count(1) from t_user t
+         <where>
+         <!-- 昨日新增 -->
+             <if test="createTime!=null">
+                 and 
+                 UNIX_TIMESTAMP(DATE_FORMAT(t.create_time,'%Y-%m-%d %H:%i:%s')) &lt;  UNIX_TIMESTAMP(DATE_FORMAT(CONCAT(DATE_FORMAT(DATE_ADD(now(),INTERVAL -1 DAY),'%Y-%m-%d'),' 23:59:59'),'%Y-%m-%d %H:%i:%s'))
+				 and  UNIX_TIMESTAMP(DATE_FORMAT(t.create_time,'%Y-%m-%d %H:%i:%s')) &gt;  UNIX_TIMESTAMP(DATE_ADD(DATE_FORMAT(now(),'%Y-%m-%d'), INTERVAL -1 DAY))
+             </if>
+             
+         <!-- 采购人员 总数-->
+             <if test="userStatus!=null">
+               and t.user_status = #{userStatus}
+             </if>  
+             
+          <!-- sku经理总数 -->
+             <if test="skuStatus!=null">
+               and t.sku_status=#{skuStatus}
+             </if> 
+             
+          <!-- 昨日sku绑定 --> 
+              <if test="skuBindTime!=null">
+                 and 
+                 UNIX_TIMESTAMP(DATE_FORMAT(t.sku_bind_time,'%Y-%m-%d  %H:%i:%s')) &lt;  UNIX_TIMESTAMP(DATE_FORMAT(CONCAT(DATE_FORMAT(DATE_ADD(now(),INTERVAL -1 DAY),'%Y-%m-%d'),' 23:59:59'),'%Y-%m-%d %H:%i:%s'))
+				 and  UNIX_TIMESTAMP(DATE_FORMAT(t.sku_bind_time,'%Y-%m-%d  %H:%i:%s')) &gt;  UNIX_TIMESTAMP(DATE_ADD(DATE_FORMAT(now(),'%Y-%m-%d'), INTERVAL -1 DAY))
+             </if>     
+             <!-- 昨日sku绑定 --> 
+              <if test="buyerBindTime!=null">
+                 and 
+                 UNIX_TIMESTAMP(DATE_FORMAT(t.buyer_bind_time,'%Y-%m-%d  %H:%i:%s')) &lt;  UNIX_TIMESTAMP(DATE_FORMAT(CONCAT(DATE_FORMAT(DATE_ADD(now(),INTERVAL -1 DAY),'%Y-%m-%d'),' 23:59:59'),'%Y-%m-%d %H:%i:%s'))
+				 and  UNIX_TIMESTAMP(DATE_FORMAT(t.buyer_bind_time,'%Y-%m-%d  %H:%i:%s')) &gt;  UNIX_TIMESTAMP(DATE_ADD(DATE_FORMAT(now(),'%Y-%m-%d'), INTERVAL -1 DAY))
+             </if>     
+         </where>
+     </select>
+ 
+     <!-- 时间段新增 -->
+     <select id="countForTimeCreate" parameterType="java.util.Map" resultMap="countVo">
+       SELECT count(1) count,temp.dete date from(
+             select t.id id, DATE_FORMAT(t.create_time,'%Y-%m-%d') dete  from t_user t where 
+              
+                 UNIX_TIMESTAMP(DATE_FORMAT(t.create_time,'%Y-%m-%d  %H:%i:%s')) &gt;  UNIX_TIMESTAMP(DATE_FORMAT(#{startTime},'%Y-%m-%d'))
+				 and  UNIX_TIMESTAMP(DATE_FORMAT(t.create_time,'%Y-%m-%d  %H:%i:%s')) &lt;  UNIX_TIMESTAMP(DATE_FORMAT(#{endTime},'%Y-%m-%d %H:%i:%s'))
+       )as temp GROUP BY temp.dete
+     </select>
+      <!-- 时间段sku绑定 -->
+     <select id="countForTimeBuyerBind" parameterType="java.util.Map" resultMap="countVo">
+       SELECT count(1) count,temp.dete date from(
+             select t.id id, DATE_FORMAT(t.buyer_bind_time,'%Y-%m-%d') dete  from t_user t where 
+                 UNIX_TIMESTAMP(DATE_FORMAT(t.buyer_bind_time,'%Y-%m-%d %H:%i:%s')) &gt;  UNIX_TIMESTAMP(DATE_FORMAT(#{startTime},'%Y-%m-%d'))
+				 and  UNIX_TIMESTAMP(DATE_FORMAT(t.buyer_bind_time,'%Y-%m-%d %H:%i:%s')) &lt;  UNIX_TIMESTAMP(DATE_FORMAT(#{endTime},'%Y-%m-%d %H:%i:%s'))
+       )as temp GROUP BY temp.dete
+     </select>
+      <!-- 时间内采购绑定 -->
+     <select id="countForTimeSkuBind" parameterType="java.util.Map" resultMap="countVo">
+       SELECT count(1) count,temp.dete date from(
+             select t.id id, DATE_FORMAT(t.sku_bind_time,'%Y-%m-%d') dete  from t_user t where 
+                 UNIX_TIMESTAMP(DATE_FORMAT(t.sku_bind_time,'%Y-%m-%d  %H:%i:%s')) &gt;  UNIX_TIMESTAMP(DATE_FORMAT(#{startTime},'%Y-%m-%d'))
+				 and  UNIX_TIMESTAMP(DATE_FORMAT(t.sku_bind_time,'%Y-%m-%d  %H:%i:%s')) &lt;  UNIX_TIMESTAMP(DATE_FORMAT(#{endTime},'%Y-%m-%d %H:%i:%s'))
+            )as temp GROUP BY temp.dete
+     </select>
+
+</mapper>
